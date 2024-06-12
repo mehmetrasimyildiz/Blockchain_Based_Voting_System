@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="row">
+                <div class="col-md-3">
+                    <img class="card-img" src="{% static 'img/1.jpg' %}">
+                </div>
+                <div class="col-md-9">
+                    <div class="card-body">
+                        <div class="card-title">HİGHT LİFE</div>
+                            <p class="card-text">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolorem eum facilis, fuga nam quidem.
+                            </p>
+                            <p class="card-text">
+                                <small class="text-muted">3 days ago</small>
+                            </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+{% endblock %}

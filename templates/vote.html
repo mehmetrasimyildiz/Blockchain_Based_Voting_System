@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="row text-center mt-10 ">
+    {% if candidates %}
+        {% for candidate in candidates %}
+        	<div class="col-md-4">
+            <div class="card p-3 mt-5 mx-auto" style="border-radius: 25px; width: 30vw; height: 70vh; box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.1); font-size: 1.4vw;">
+                <h2>Name: {{ candidate.name }}</h2>
+                <h2>CandidateID: {{ candidate.candidateID }}</h2>
+                <h3>Age: {{ candidate.age }}</h3>
+                <h4>Gender: {{ candidate.gender }}</h4>
+                <h5>Party: {{ candidate.party }}</h5>
+                <h6>Profession: {{ candidate.profession }} </h6>
+                <h6>Criminal Records: {% if candidate.criminal_records == False %} None {% else %} Present {% endif %}</h6>
+                <form action="{% url 'create' pk=candidate.candidate_id %}" method="POST" class="form-group">
+                    {% csrf_token %}
+                    <input type="text" name="phrase" class="form-control my-3" placeholder="Enter passphares" style="text-align: center" required>
+                    <input type="submit" value="Vote" class="btn btn-primary my-4">
+                </form>
+            </div> 
+            </div>
+        {% endfor %}
+    {% else %}
+    <p>No candidates yet</p>
+    {% endif %}
+    <div>
+    </div>
+    </div>
+{% endblock %}
