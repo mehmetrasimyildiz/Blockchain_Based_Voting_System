@@ -2,27 +2,38 @@
 {% load static %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-12">
-        <div class="card mb-3">
-            <div class="row">
-                <div class="col-md-3">
-                    <img class="card-img" src="{% static 'img/1.jpg' %}">
-                </div>
-                <div class="col-md-9">
-                    <div class="card-body">
-                        <div class="card-title">HİGHT LİFE</div>
-                            <p class="card-text">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque dolorem eum facilis, fuga nam quidem.
-                            </p>
-                            <p class="card-text">
-                                <small class="text-muted">3 days ago</small>
-                            </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  </div>
+  <div class="jumbotron text-left">
+        <h1 class="display-4">What is the Votbase ?</h1>
+        <p class="lead my-4">This is a blockchain based voting system. You can cast your votes safely and Important information is kept encrypted and inaccessible in the system.
+            It uses blockchain technology and the latest encryption algorithms. In addition to we present you an easy-to-use and fast voting system.
+            You can get more information by clicking on the about us page below.
+            <br>
+        </p>
+        
 
+    </div>
+    <nav class='navbar navbar-expand-lg navbar-dark bg-dark justify-content-center'>
+        <div class="text-center">
+          <ul class="navbar-nav  " >
+              {% if not user.is_authenticated %}
+             <li class="nav-item mr-2">
+               <button onclick="location.href='register'" type="button" class="btn btn-dark btn-lg">Register</button>
+             </li>      
+             <li class="nav-item mr-2">
+               <button onclick="location.href='about'" type="button" class="btn btn-dark btn-lg">About</button>
+             </li>
+             <li class="nav-item mr-2">
+               <button onclick="location.href='login'" type="button" class="btn btn-dark btn-lg">Login</button>
+             </li>     
+               {% else %}
+             <li class="nav-item mr-2">
+               <button onclick="location.href='vote'" type="button" class="btn btn-dark btn-lg">Vote</button><br>
+             </li>  
+             <li class="nav-item mr-2">
+               <button onclick="location.href=''" type="button" class="btn btn-dark btn-lg">About</button>
+             </li>      &nbsp;&nbsp;
+               {% endif %}
+    </ul>
+    </div>
+   </nav>
 {% endblock %}

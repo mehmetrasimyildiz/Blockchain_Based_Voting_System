@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
+{% load static %}
 {% block content %}
-    <div class="alert alert-success text-center" role="alert">
+    <div class="alert alert-info text-center" role="alert">
         <h4 class="alert-heading">All votes have been verified successfully!</h4>
     </div>
     <table class="table table-hover text-center">
@@ -16,8 +17,8 @@
         {% if candidates %}
         <tbody>
         {% for candidate in candidates %}
-            <tr style="{% if candidate == winner %} background-color:#2ecc71; color:white; {% endif %}">
-                <th scope="row">{{ candidate.candidateID }}</th>
+            <tr style="{% if candidate == winner %}  {% endif %}">
+                <td>{{ candidate.user_id }}</td>
                 <td>{{ candidate.name }}</td>
                 <td>{{ candidate.age }}</td>
                 <td>{{ candidate.party }}</td>

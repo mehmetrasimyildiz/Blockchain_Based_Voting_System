@@ -1,4 +1,3 @@
-
 import hashlib
 import math
 
@@ -16,7 +15,7 @@ class Node:
         return self.data
 
     def isLeaf(self):
-        return ((self.left == None) and (self.right == None))
+        return (self.left == None) and (self.right == None)
 
 
 class merkleTree:
@@ -26,13 +25,13 @@ class merkleTree:
         self._merkleRoot = ''
 
     def __returnHash(self, x):
-        return (hashlib.sha256(x.encode()).hexdigest())
+        return hashlib.sha256(x.encode()).hexdigest()
 
     def makeTreeFromArray(self, arr):
 
         def __noOfNodesReqd(arr):
             x = len(arr)
-            return (2 * x - 1)
+            return 2 * x - 1
 
         def __buildTree(arr, root, i, n):
 
@@ -46,7 +45,6 @@ class merkleTree:
 
             return root
 
-
         def __addLeafData(arr, node):
 
             if not node:
@@ -58,7 +56,6 @@ class merkleTree:
             else:
                 node.data = ''
             __addLeafData(arr, node.right)
-
 
         nodesReqd = __noOfNodesReqd(arr)
         nodeArr = [num for num in range(1, nodesReqd + 1)]
@@ -72,7 +69,6 @@ class merkleTree:
         self.inorderTraversal(node.left)
         print(node)
         self.inorderTraversal(node.right)
-
 
     def calculateMerkleRoot(self):
 
@@ -90,10 +86,8 @@ class merkleTree:
 
         return self._merkleRoot
 
-
     def getMerkleRoot(self):
         return self._merkleRoot
-
 
     def verifyUtil(self, arr1):
         hash1 = self.getMerkleRoot()

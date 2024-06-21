@@ -10,7 +10,7 @@
                 {{ status }}
             </p>
         
-            <form action="{% url 'seal' %}" method="POST">
+            <form action="{% url 'create' %}" method="POST">
                 {% csrf_token %}
                 <input name="ballot_input" type="hidden" value="{{ ballot }}">
                 <input name="vote_id" type="hidden" value="{{ id }}">

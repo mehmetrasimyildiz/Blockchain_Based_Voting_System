@@ -1,6 +1,11 @@
+import hashlib
 import uuid
-from django.db import models
 from datetime import datetime
+
+from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+import json
 
 
 # Create your models here.
@@ -9,74 +14,111 @@ def get_time():
     return datetime.now().timestamp()
 
 
+class Candidate(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    age = models.IntegerField(default=18, validators=[MinValueValidator(18), MaxValueValidator(120)])
+    gender = models.CharField(max_length=100, blank=True, null=True)
+    party = models.CharField(max_length=100, blank=True, null=True)
+    profession = models.CharField(max_length=100, blank=True, null=True)
+    criminalRecords = models.BooleanField(default=False)
+    encrypted_data = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.user
+
+
 class Vote(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    vote = models.IntegerField(default=0)
-    timestamp = models.DateTimeField(default=get_time)
-    block_id = models.IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return "{}|{}|{}".format(self.id, self.vote, self.timestamp)
-
-
-class Candidate(models.Model):
-    candidate_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=100)
-    age = models.IntegerField(default=18)
-    gender = models.CharField(max_length=100)
-    party = models.CharField(max_length=100)
-    profession = models.CharField(default=None,max_length=100)
-    criminal_records = models.BooleanField(default=False)
-    count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return self.name
-
-
-class Voter(models.Model):
-    username = models.CharField(max_length=100, primary_key=True)
-    public_key_n = models.CharField(max_length=100)
-    public_key_e = models.IntegerField(default=0)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    vote_to_who = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     has_voted = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.username
-
-
-class Voter_List(models.Model):
-    username = models.CharField(max_length=100, primary_key=True)
-
-    def __str__(self):
-        return self.username
-
-
-class Voter_Pvt(models.Model):
-    username = models.CharField(max_length=100, primary_key=True)
-    salt = models.CharField(max_length=100)
-    public_key_n = models.CharField(max_length=100)
-    public_key_d = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.username
+        return "{}|{}|{}".format(self.id, self.user, self.timestamp)
 
 
 class Block(models.Model):
-    id = models.IntegerField(primary_key=True, default=0)
-    perv_hash = models.CharField(max_length=100, blank=True)
-    merkle_hash = models.CharField(max_length=100, blank=True)
-    self_hash = models.CharField(max_length=100, blank=True)
-    nonce = models.IntegerField(null=True)
-    timestamp = models.FloatField(default=get_time)
+    index = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    data = models.TextField()
+    previous_hash = models.CharField(max_length=64)
+    hash = models.CharField(max_length=64)
 
-    def __str__(self):
-        return str(self.self_hash)
+    def save(self, *args, **kwargs):
+        self.hash = self.calculate_hash()
+        super(Block, self).save(*args, **kwargs)
+
+    def calculate_hash(self):
+        block_dict = {
+            'index': self.index,
+            'timestamp': self.timestamp,
+            'data': self.data,
+            'previous_hash': self.previous_hash
+        }
+        block_string = json.dumps(block_dict, sort_keys=True).encode()
+        return hashlib.sha256(block_string).hexdigest()
+
+    @staticmethod
+    def create_genesis_block():
+        return Block(index=0, data="Genesis Block", previous_hash="0")
+
+    @staticmethod
+    def get_latest_block():
+        return Block.objects.last()
+
+    @staticmethod
+    def add_block(data):
+        previous_block = Block.get_latest_block()
+        previous_hash = previous_block.hash if previous_block else '0'
+        new_block = Block(index=previous_block.index + 1 if previous_block else 0, data=data, previous_hash=previous_hash)
+        new_block.save()
+        return new_block
+
+    @staticmethod
+    def is_chain_valid():
+        blocks = Block.objects.all()
+        for i in range(1, len(blocks)):
+            current_block = blocks[i]
+            previous_block = blocks[i - 1]
+
+            if current_block.hash != current_block.calculate_hash():
+                return False
+
+            if current_block.previous_hash != previous_block.hash:
+                return False
+
+        return True
 
 
-class Vote_Auth(models.Model):
-    username = models.CharField(max_length=100, primary_key=True, default='admin')
-    start = models.DateTimeField()
-    end = models.DateTimeField()
-    result_Calculated = models.BooleanField(default=False)
-    perv_hash = models.CharField(max_length=100, default='0' * 64)
+class MerkleTree:
+    def __init__(self, data_list):
+        self.data_list = data_list
+        self.tree = self.build_merkle_tree(data_list)
+
+    def build_merkle_tree(self, data_list):
+        if len(data_list) == 1:
+            return data_list
+
+        new_level = []
+        for i in range(0, len(data_list), 2):
+            left = data_list[i]
+            right = data_list[i + 1] if i + 1 < len(data_list) else left
+            new_level.append(self.hash_pair(left, right))
+
+        return self.build_merkle_tree(new_level)
+
+    @staticmethod
+    def hash_pair(left, right):
+        return hashlib.sha256((left + right).encode()).hexdigest()
+
+    def get_root(self):
+        return self.tree[0] if self.tree else None
+
+
+def encrypt_user_info(username, email, first_name, last_name):
+    data_string = f"{username},{email},{first_name},{last_name}"
+    return hashlib.sha256(data_string.encode()).hexdigest()
 
 

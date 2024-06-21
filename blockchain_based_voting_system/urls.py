@@ -20,6 +20,5 @@ from django.contrib.auth.views import LoginView
 
 urlpatterns = [
     path('', include('votbase.urls')),
-    path('user/', include('user.urls')),
     path('admin/', admin.site.urls),
 ]
