@@ -1,15 +1,16 @@
 {% extends 'layout.html' %}
 {% load static %}
-
 {% block content %}
  
 
 <body>
     <h1>Encrypted Information</h1>
     <ul>
-        {% for block in blocks %}
-        <li>Username+First_name+last_name+email {{ block.data }}</li>
-        {% endfor %}
+         <li>{{ user.username }} ----- {{ username_hash }}</li>
+         <li>{{ user.first_name }} ----- {{ first_name_hash }}</li>
+         <li>{{ user.last_name }} ------ {{ last_name_hash }}</li>
+         <li>{{ user.email }} ------ {{ email_hash }}</li>
+        <li>password--------- {{ user.password }} </li>
     </ul>
 </body>
 

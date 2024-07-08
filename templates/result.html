@@ -17,7 +17,12 @@
         {% if candidates %}
         <tbody>
         {% for candidate in candidates %}
-            <tr style="{% if candidate == winner %}  {% endif %}">
+            {% if forloop.counter == 1  %}
+            	<tr class="table-success">
+            {% else  %}    
+                <tr>
+            {% endif %} 
+            
                 <td>{{ candidate.user_id }}</td>
                 <td>{{ candidate.name }}</td>
                 <td>{{ candidate.age }}</td>

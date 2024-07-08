@@ -1,15 +1,17 @@
+from django.db.models import Count
 import hashlib
-from datetime import datetime
-
+import operator
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django import template
 
+register = template.Library()
 from . import models
 from .forms import UserRegistrationForm, CandidatesInfoForm
-from .models import Candidate, Vote, Block, MerkleTree
+from .models import Candidate, Vote, Block
 
 
 # Create your views here.
@@ -36,20 +38,27 @@ def register_view(request):
             last_name_hash = hash_string(user.last_name)
 
             combined_hash = f"{username_hash},{email_hash},{first_name_hash},{last_name_hash}"
-            Block.add_block(combined_hash)
-
+            Block.add_block(combined_hash, user)
             login(request, user)
             return redirect('index')
 
-    return render(request, 'register2.html', {'form': form})
+    return render(request, 'register.html', {'form': form})
 
 
 def show_encrypted_info(request):
-    blocks = Block.objects.all()
-    data = [block.data for block in blocks]
-    merkle_tree = MerkleTree(data)
-    root_hash = merkle_tree.get_root()
-    return render(request, 'encrypted_info.html', {'blocks': blocks, 'root_hash': root_hash})
+    user = request.user
+    blocks = Block.objects.filter(user=user)
+    username_hash = hash_string(user.username)
+    email_hash = hash_string(user.email)
+    first_name_hash = hash_string(user.first_name)
+    last_name_hash = hash_string(user.last_name)
+
+    return render(request, 'encrypted_info.html', {'blocks': blocks,
+                                                   'username_hash': username_hash,
+                                                   'email_hash': email_hash,
+                                                   'first_name_hash': first_name_hash,
+                                                   'last_name_hash': last_name_hash
+                                                   })
 
 
 @login_required(login_url='login')
@@ -59,7 +68,7 @@ def vote(request):
         candidate = Candidate.objects.get(id=candidate_id)
         Vote.objects.create(user=request.user, vote_to_who=candidate, has_voted=True)
 
-        return render(request, 'status.html')
+        return render(request, 'index.html')
 
     candidates = Candidate.objects.all()
     return render(request, 'vote.html', {'candidates': candidates})
@@ -84,14 +93,17 @@ def singing(request):
 
 @login_required()
 def result(request):
-    candidates = models.Candidate.objects.all()
-    candidates_with_votes = []
-    for candidate in candidates:
-        candidate.count = models.Vote.objects.filter(vote_to_who=candidate).count()
-        candidates_with_votes.append(candidate)
+    vote = models.Vote.objects.all().values('vote_to_who_id').annotate(Count('vote_to_who_id')).order_by(
+        '-vote_to_who_id__count')
+    candidates = []
+    for index in vote:
+        print(index['vote_to_who_id'])
+        candidate = models.Candidate.objects.get(id=index['vote_to_who_id'])
+        candidate.count = index['vote_to_who_id__count']
+        candidates.append(candidate)
+
     context = {
         'candidates': candidates,
-        'candidates_with_votes': candidates_with_votes,
     }
     return render(request, 'result.html', context)
 
@@ -130,7 +142,7 @@ def create(request):
             candidate_id = request.POST["candidate_id"]
             models.Vote.objects.create(user=request.user, vote_to_who_id=candidate_id, has_voted=True)
 
-            return render(request, 'status.html')
+            return render(request, 'index.html')
 
     return render(request, 'failure.html')
 

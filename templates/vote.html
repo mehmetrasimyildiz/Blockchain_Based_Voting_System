@@ -2,13 +2,15 @@
 {% load static %}
 
 {% block content %}
+    <div class="row  ">
     
-    <div class="row text-center mt-10 border border-danger ">
-    <div class="row border border-info ">
-    <div id="countdownExample" >
-      <div class="values"></div>
+          <div class="alert alert-info text-center" role="alert">
+        <h4 class="alert-heading" id="countdown-timer"></h4>
+   
       </div>
     </div>
+    <div class="row text-center mt-10  ">
+    
     {% if message %}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ message }}
@@ -16,7 +18,7 @@
     {% if candidates %}
         {% for candidate in candidates %}
         	<div class="col-md-4">
-            <div class="card p-3 mt-5 mx-auto" style="border-radius: 25px; width: 30vw; height: 70vh; box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.1); font-size: 1.4vw;">
+            <div class="card p-3 mt-5 mx-auto" >
                 <h2>Name: {{ candidate.name }}</h2>
                 <h2>CandidateID: {{ candidate.user_id }}</h2>
                 <h3>Age: {{ candidate.age }}</h3>
@@ -27,7 +29,7 @@
                 <form action="{% url 'create'  %}" method="POST" class="form-group">
                     {% csrf_token %}
                     <input type="hidden" name="candidate_id" value="{{ candidate.id }}">
-                    <input type="submit" value="Vote" id="vote-button" class="btn btn-primary my-4">
+                    <input type="submit" value="Vote"  class="btn btn-primary my-4 vote-button">
                 </form>
             
             </div> 

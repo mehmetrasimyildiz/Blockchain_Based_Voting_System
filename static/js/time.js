@@ -1,17 +1,17 @@
 
 
 var timer = new Timer();
-timer.start({countdown: true, startValues: {seconds: 5}});
+timer.start({countdown: true, startValues: {seconds: 60}});
 
-$('#countdownExample .values').html(timer.getTimeValues().toString());
+$('#countdown-timer').html(timer.getTimeValues().toString());
 
 timer.addEventListener('secondsUpdated', function (e) {
-    $('#countdownExample .values').html(timer.getTimeValues().toString());
+    $('#countdown-timer').html(timer.getTimeValues().toString());
 });
 
 timer.addEventListener('targetAchieved', function (e) {
-    $('#countdownExample .values').html('Time is up');
+    $('#countdown-timer').html('Time is up');
 
-$('#vote-button').hide()
+$('.vote-button').hide()
 });
 
